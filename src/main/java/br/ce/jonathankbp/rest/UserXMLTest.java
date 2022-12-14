@@ -3,7 +3,12 @@ package br.ce.jonathankbp.rest;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
+import java.util.ArrayList;
+
+import org.junit.Assert;
 import org.junit.Test;
+
+import io.restassured.internal.path.xml.NodeImpl;
 
 public class UserXMLTest {
 
@@ -14,13 +19,13 @@ public class UserXMLTest {
 			.get("http://restapi.wcaquino.me/usersXML/3")
 		.then()
 			.statusCode(200)
-			.body("name", is("Ana Julia"))
-			.body("@id", is("3"))
-			.body("name.size()", is(2))
-			.body("name[0]", is("Zezinho"))
-			.body("name[1]", is("Luizinho"))
-			.body("name", hasItem("Luizinho"))
-			.body("name", hasItems("Luizinho", "Zezinho"));
+			.body("user.name", is("Ana Julia"))
+			.body("user.@id", is("3"))
+			.body("user.filhos.name.size()", is(2))
+			.body("user.filhos.name[0]", is("Zezinho"))
+			.body("user.filhos.name[1]", is("Luizinho"))
+			.body("user.filhos.name", hasItem("Luizinho"))
+			.body("user.filhos.name", hasItems("Luizinho", "Zezinho"));
 	}
 	
 	@Test
@@ -61,5 +66,19 @@ public class UserXMLTest {
 			.body("users.user.salary.find{it != null}.toDouble()", is(1234.5678d))
 			.body("users.user.age.collect{it.toInteger() * 2}", hasItems(40, 50, 60))
 			.body("users.user.name.findAll{it.toString().startsWith('Maria')}.collect{it.toString().toUpperCase()}", is("MARIA JOAQUINA"));
+	}
+	
+	@Test
+	public void devoFazerPesquisaAvancadaComXMlEJava() {
+		ArrayList<NodeImpl> nomes = given()
+		.when()
+			.get("https://restapi.wcaquino.me/usersXML")
+		.then()
+			.statusCode(200)
+			.extract().path("users.user.name.findAll{it.toString().contains('n')}");
+		
+		Assert.assertEquals(2, nomes.size());
+		Assert.assertEquals("Maria Joaquina".toUpperCase(), nomes.get(0).toString().toUpperCase());
+		Assert.assertTrue("ANA JULIA".equalsIgnoreCase(nomes.get(1).toString()));
 	}
 }
