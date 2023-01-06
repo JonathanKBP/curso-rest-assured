@@ -1,7 +1,8 @@
 package br.ce.jonathankbp.rest;
 
 public class User {
-
+	
+	private Long id;
 	private String name;
 	private Integer age;
 	private Double salary;
@@ -31,4 +32,16 @@ public class User {
 		this.salary = salary;
 	}
 	
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	@Override
+	public String toString() {
+		return "User [id=" + id + ", name=" + name + ", age=" + age + ", salary=" + salary + "]";
+	}
 }
