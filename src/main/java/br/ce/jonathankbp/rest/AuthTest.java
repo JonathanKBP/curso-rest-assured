@@ -34,6 +34,55 @@ public class AuthTest {
 			.body("coord.lon", is(-38.52f))
 			.body("main.temp", greaterThan(25f));
 	}
+	
+	@Test
+	public void naoDeveAcessarSemSenha() {
+		given()
+			.log().all()
+		.when()
+			.get("https://restapi.wcaquino.me/basicauth")
+		.then()
+			.log().all()
+			.statusCode(401);
+	}
+	
+	@Test
+	public void DevefazerAutenticacaoBasica() {
+		given()
+			.log().all()
+		.when()
+			.get("https://admin:senha@restapi.wcaquino.me/basicauth")
+		.then()
+			.log().all()
+			.statusCode(200)
+			.body("status", is("logado"));
+	}
+	
+	@Test
+	public void DevefazerAutenticacaoBasica2() {
+		given()
+			.log().all()
+			.auth().basic("admin", "senha")
+		.when()
+			.get("https://restapi.wcaquino.me/basicauth")
+		.then()
+			.log().all()
+			.statusCode(200)
+			.body("status", is("logado"));
+	}
+	
+	@Test
+	public void DevefazerAutenticacaoBasicaChallenge() {
+		given()
+			.log().all()
+			.auth().preemptive().basic("admin", "senha")
+		.when()
+			.get("https://restapi.wcaquino.me/basicauth2")
+		.then()
+			.log().all()
+			.statusCode(200)
+			.body("status", is("logado"));
+	}
 }
 
 
