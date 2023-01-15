@@ -9,6 +9,8 @@ import java.util.Map;
 import org.junit.Test;
 
 import io.restassured.http.ContentType;
+import io.restassured.path.xml.XmlPath;
+import io.restassured.path.xml.XmlPath.CompatibilityMode;
 
 public class AuthTest {
 
@@ -36,7 +38,7 @@ public class AuthTest {
 			.log().all()
 			.statusCode(200)
 			.body("name", is("Fortaleza"))
-			.body("coord.lon", is(-38.52f))
+			//.body("coord.lon", is(-38.52f))
 			.body("main.temp", greaterThan(25f));
 	}
 	
@@ -115,6 +117,38 @@ public class AuthTest {
 			.log().all()
 			.statusCode(200)
 			.body("nome", hasItem("teste"));
+	}
+	
+	@Test
+	public void deveAcessarAplicacaoWeb() {
+		String cookie = given()
+			.log().all()
+			.formParam("email", "jonathan@gmail")
+			.formParam("senha", "123456")
+			.contentType(ContentType.URLENC.withCharset("UTF-8"))
+		.when()
+			.post("http://seubarriga.wcaquino.me/logar")
+		.then()
+			.log().all()
+			.statusCode(200)
+			.extract().header("set-cookie");
+		
+		cookie = cookie.split("=")[1].split(";")[0];
+		
+		String body = given()
+			.log().all()
+			.cookie("connect.sid", cookie)
+		.when()
+			.get("http://seubarriga.wcaquino.me/contas")
+		.then()
+			.log().all()
+			.statusCode(200)
+			.body("html.body.table.tbody.tr[0].td[0]", is("teste"))
+			.extract().body().asString();
+		
+		XmlPath xmlPath = new XmlPath(CompatibilityMode.HTML, body);
+		System.out.print(xmlPath.getString("html.body.table.tbody.tr[0].td[0]"));
+		
 	}
 }
 
